@@ -121,10 +121,10 @@ class ExampleWriter(object):
 
   def __init__(self, job_id, vocab_file, output_dir, max_seq_length,
                num_jobs, blanks_separate_docs, do_lower_case,
-               num_out_files=1000, strip_accents=True):
+               num_out_files=1000, strip_accents=True, tokenizer_path=''):
     self._blanks_separate_docs = blanks_separate_docs
     tokenizer = \
-        transformers.BertJapaneseTokenizer.from_pretrained('cl-tohoku/bert-base-japanese-whole-word-masking')
+        transformers.BertJapaneseTokenizer.from_pretrained(tokenizer_path)
     self._example_builder = ExampleBuilder(tokenizer, max_seq_length)
     self._writers = []
     for i in range(num_out_files):
@@ -174,6 +174,7 @@ def write_examples(job_id, args):
       blanks_separate_docs=args.blanks_separate_docs,
       do_lower_case=args.do_lower_case,
       strip_accents=args.strip_accents,
+      tokenizer_path=args.tokenizer_path,
   )
   log("Writing tf examples")
   fnames = sorted(tf.io.gfile.listdir(args.corpus_dir))
@@ -208,6 +209,8 @@ def main():
                       help="Parallelize across multiple processes.")
   parser.add_argument("--blanks-separate-docs", default=True, type=bool,
                       help="Whether blank lines indicate document boundaries.")
+  parser.add_argument("--tokenizer-path", required=True,
+                      help="tokenizer dir path including vocab and config")
 
   # toggle lower-case
   parser.add_argument("--do-lower-case", dest='do_lower_case',
